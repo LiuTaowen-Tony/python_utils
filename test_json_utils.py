@@ -8,22 +8,24 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 # Assuming your json_utils.py is in the same directory, otherwise adjust the import
-from json_utils import JsonSerializationMixin  # Replace 'your_module' with the actual module name
+from json_utils import Serial  # Replace 'your_module' with the actual module name
+
 
 # Define some dataclasses for testing
 @dataclass
-class NestedData(JsonSerializationMixin):
+class NestedData(Serial):
     value: int = 10
     text: str = "nested"
 
 
 @dataclass
-class DataDictionary(JsonSerializationMixin):
+class DataDictionary(Serial):
     name: str = "dict_example"
     data_dict: dict[str, NestedData] = field(default_factory=dict) # Dictionary of NestedData
 
+
 @dataclass
-class SampleData(JsonSerializationMixin):
+class SampleData(Serial):
     name: str = "example"
     count: int = 42
     data_list: List[int] = field(default_factory=lambda: [1, 2, 3])
@@ -32,6 +34,7 @@ class SampleData(JsonSerializationMixin):
     nested: NestedData = field(default_factory=NestedData)
     optional_value: Optional[int] = None
     not_initialized: str = field(default="default_value", repr=False) # Example of field with init=False
+
 
 class TestJsonSerializationMixin(unittest.TestCase):
 

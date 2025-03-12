@@ -1,12 +1,12 @@
 from dataclasses import fields
-from typing import Any, Dict, Type, get_origin, get_args, get_type_hints, TypeVar, Generic
+from typing import Any, Dict, Optional, Type, get_origin, get_args, get_type_hints, TypeVar, Generic
 import json
 import os
 import numpy as np
 import torch
 
-T = TypeVar('T', bound='JsonSerializationMixin')
-class JsonSerializationMixin(Generic[T]):
+T = TypeVar('T', bound='Serial')
+class Serial(Generic[T]):
     def to_dict(self) -> Dict[str, Any]:
         data = {}
         for field_ in fields(self):
@@ -34,7 +34,10 @@ class JsonSerializationMixin(Generic[T]):
         return data
 
     @classmethod
-    def from_dict(cls: Type[T], data: Dict[str, Any]) -> T:
+    def from_dict(cls: Type[T], data: Dict[str, Any], target_class: Optional[Type[T]] = None) -> T:
+        if cls is Serial:
+            cls = target_class
+        assert cls is not None, "Must provide target_class when calling from_dict on Serial subclass"
         type_hints = get_type_hints(cls)
         kwargs = {}
         dataclass_fields = {f.name for f in fields(cls)}
@@ -74,8 +77,15 @@ class JsonSerializationMixin(Generic[T]):
             json.dump(self.to_dict(), f, indent=4) # Use json.dump and to_dict
 
     @classmethod
-    def load_json(cls: Type[T], filepath: str) -> T:
+    def load_json(cls: Type[T], filepath: str, target_class: Optional[Type[T]] = None) -> T:
+        if cls is Serial:
+            cls = target_class
+        assert cls is not None, "Must provide target_class when calling from_dict on Serial subclass"
         """Loads the object from a JSON file."""
         with open(filepath, 'r') as f: # Open in text mode 'r' for JSON
             data = json.load(f) # Use json.load
         return cls.from_dict(data) # Use cls.from_dict to reconstruct
+
+
+
+
