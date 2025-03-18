@@ -33,7 +33,7 @@ class SampleData(Serial):
     torch_tensor: torch.Tensor = field(default_factory=lambda: torch.tensor([7, 8, 9]))
     nested: NestedData = field(default_factory=NestedData)
     optional_value: Optional[int] = None
-    not_initialized: str = field(default="default_value", repr=False) # Example of field with init=False
+    not_initialized: str = field(default="default_value", init=False) # Example of field with init=False
 
 
 class TestJsonSerializationMixin(unittest.TestCase):
@@ -47,7 +47,7 @@ class TestJsonSerializationMixin(unittest.TestCase):
 
     def test_to_dict(self):
         sample_instance = SampleData()
-        data_dict = sample_instance.to_dict()
+        data_dict = sample_instance.as_dict()
 
         expected_dict = {
             'name': 'example',
@@ -84,7 +84,6 @@ class TestJsonSerializationMixin(unittest.TestCase):
         self.assertEqual(reconstructed_instance.optional_value, 123)
         self.assertEqual(reconstructed_instance.not_initialized, "default_value") # Check default value for init=False fields
 
-
     def test_save_json(self):
         sample_instance = SampleData(name="save_test", count=50)
         sample_instance.save_json(self.temp_filepath)
@@ -103,7 +102,6 @@ class TestJsonSerializationMixin(unittest.TestCase):
             'optional_value': None,
         } # Note: original numpy/torch data is used in default sample instance, not 'save_test' instance
         self.assertEqual(loaded_data, expected_data)
-
 
     def test_load_json(self):
         # Create a json file to load from
@@ -131,12 +129,11 @@ class TestJsonSerializationMixin(unittest.TestCase):
         self.assertEqual(loaded_instance.optional_value, 456)
         self.assertEqual(loaded_instance.not_initialized, "default_value") # Check default value for init=False fields
 
-
     def test_to_dict_with_dict_of_classes(self):
         nested1 = NestedData(value=100, text="dict_nested_1")
         nested2 = NestedData(value=200, text="dict_nested_2")
         dict_instance = DataDictionary(data_dict={"item1": nested1, "item2": nested2})
-        data_dict = dict_instance.to_dict()
+        data_dict = dict_instance.as_dict()
 
         expected_dict = {
             'name': 'dict_example',
